@@ -2,6 +2,7 @@
 #include <fstream>
 #include <complex>
 #include <vector>
+#include <array>
 #include <FFT.hpp>
 #include <iterator>
 #include <algorithm>
@@ -39,6 +40,9 @@ double strtodb (const std::string& str)
 
 int main()
 {
+    static constexpr size_t electrod_cnt = 8;
+    static constexpr size_t used_electrod_cnt = 1; // electrod_cnt;
+
     const size_t leng{100};
 
     std::string fname = "debug.txt";
@@ -52,13 +56,13 @@ int main()
         std::cout << "Unable to open file" << std::endl;
         exit(1);
     }
-    
 
-    std::string row, str_elc1, str_elc2, str_elc3, str_elc4, str_elc5, str_elc6, str_elc7, str_elc8, str_acc1, str_acc2, str_acc3, str_tst;
-    std::vector<double> electrod1, electrod2, electrod3, electrod4, electrod5, electrod6, electrod7, electrod8;
+
+    std::string row;
+    std::array<std::string, electrod_cnt> str_elcs;
+    std::string str_acc1, str_acc2, str_acc3, str_tst;
+    std::array<std::vector<double>, electrod_cnt> electrods;
     std::string date;
-
-    csignal sig1, sig2, sig3, sig4, sig5, sig6, sig7, sig8;
 
     std::ofstream odata;
     std::ofstream otrafo;
@@ -68,48 +72,51 @@ int main()
 
     int n = 0;
 
-    while (inFile >> row >> str_elc1 >> str_elc2 >> str_elc3 >> str_elc4 >> str_elc5 >> str_elc6 >> str_elc7 >> str_elc8 >> str_acc1 >> str_acc2 >> str_acc3 >> date >> str_tst)
+    while (inFile >> row >> str_elcs[0] >> str_elcs[1] >> str_elcs[2] >> str_elcs[3] >> str_elcs[4] >> str_elcs[5] >> str_elcs[6] >> str_elcs[7] >> str_acc1 >> str_acc2 >> str_acc3 >> date >> str_tst)
     {
         if (odata.is_open())
         {
-            std::string line = row + ' ' + str_elc1 + ' ' + str_elc2 + ' ' + str_elc3 + ' ' + str_elc4 + ' ' + str_elc5 + ' ' + str_elc6 + ' ' + str_elc7 + ' ' + str_elc8 + ' ' + str_acc1 + ' ' + str_acc2 + ' ' + str_acc3 + ' ' + date + ' ' + str_tst;
+            std::string line = row + ' ' + str_elcs[0] + ' ' + str_elcs[1] + ' ' + str_elcs[2] + ' ' + str_elcs[3] + ' ' + str_elcs[4] + ' ' + str_elcs[5] + ' ' + str_elcs[6] + ' ' + str_elcs[7] + ' ' + str_acc1 + ' ' + str_acc2 + ' ' + str_acc3 + ' ' + date + ' ' + str_tst;
             odata << line;
             odata << std::endl;
         } else std::cout << "Unable to open out file!";
         
         // double elc1 = strtodb(str_elc1);
-        electrod1.push_back(std::stod(str_elc1));
-        // electrod2[n] = std::stod(str_elc2);
-        // electrod3[n] = std::stod(str_elc3);
-        // electrod4[n] = std::stod(str_elc4);
-        // electrod5[n] = std::stod(str_elc5);
-        // electrod6[n] = std::stod(str_elc6);
-        // electrod7[n] = std::stod(str_elc7);
-        // electrod8[n] = std::stod(str_elc8);
+        for (size_t k = 0; k < used_electrod_cnt; ++k)
+        {
+            electrods[k].push_back(std::stod(str_elcs[k]));
+        }
         n++;
     }
     
-    std::transform(electrod1.cbegin(), electrod1.cend(), sig1.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod2.cbegin(), electrod2.cend(), sig2.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod3.cbegin(), electrod3.cend(), sig3.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod4.cbegin(), electrod4.cend(), sig4.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod5.cbegin(), electrod5.cend(), sig5.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod6.cbegin(), electrod6.cend(), sig6.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod7.cbegin(), electrod7.cend(), sig7.begin(), [](double val){ return std::complex<double>(val, 0); });
-    // std::transform(electrod8.cbegin(), electrod8.cend(), sig8.begin(), [](double val){ return std::complex<double>(val, 0); });
+    auto make_sig = [](const std::vector<double>& electrod) {
+        csignal sig;
+        std::transform(electrod.cbegin(), electrod.cend(), sig.begin(), [](double val) { return std::complex<double>(val, 0); });
+        return sig;
+    };
 
-    csignal fftSign1(fourier_transform(sig1));
-    // csignal fftSign2(fourier_transform(sig2));
-    // csignal fftSign3(fourier_transform(sig3));
-    // csignal fftSign4(fourier_transform(sig4));
-    // csignal fftSign5(fourier_transform(sig5));
-    // csignal fftSign6(fourier_transform(sig6));
-    // csignal fftSign7(fourier_transform(sig7));
-    // csignal fftSign8(fourier_transform(sig8));
+    std::array<csignal, electrod_cnt> sigs;
 
-    for (int i = 0; i < fftSign1.size(); ++i)
+    for (size_t k = 0; k < used_electrod_cnt; ++k)
     {
-        otrafo << i << '\t' << fftSign1[i].real() /*<< '\t' << fftSign2[i].real() << '\t' << fftSign3[i].real() << '\t' << fftSign4[i].real() << '\t' << fftSign5[i].real() << '\t' << fftSign6[i].real() << '\t' << fftSign7[i].real() << '\t' << fftSign8[i].real()*/ << '\n';
+        sigs[k] = make_sig(electrods[k]);
+    }
+
+    std::array<csignal, electrod_cnt> fftSigns;
+
+    for (size_t k = 0; k < used_electrod_cnt; ++k)
+    {
+        fftSigns[k] = fourier_transform(sigs[k]);
+    }
+
+    for (size_t i = 0; i < fftSigns[0].size(); ++i)
+    {
+        otrafo << i;
+        for (size_t k = 0; k < used_electrod_cnt; ++k)
+        {
+            otrafo << '\t' << fftSigns[k][i].real();
+        }
+        otrafo << '\n';
     }
     
     
