@@ -90,7 +90,7 @@ int main()
     }
     
     auto make_sig = [](const std::vector<double>& electrod) {
-        csignal sig;
+        csignal sig(electrod.size());
         std::transform(electrod.cbegin(), electrod.cend(), sig.begin(), [](double val) { return std::complex<double>(val, 0); });
         return sig;
     };
