@@ -5,6 +5,7 @@
 #include <FFT.hpp>
 #include <iterator>
 #include <algorithm>
+#include <cctype>
 // #include <fftw3.h>
 
 using cmplx = std::complex<double>;
@@ -22,7 +23,7 @@ double strtodb (const std::string& str)
     {
         if (str[i] == '-'){ str2 += str[i]; }
         else if (str[i] == '.'){ str2 += str[i]; }
-        else if (std::isdigit(str[i]) == true) { str2 += str[i]; }
+        else if (std::isdigit(str[i])) { str2 += str[i]; }
         else if (str[i] == 'n'){ str2 = '0'; }
         else if (str[i] == ',')
         {
@@ -54,11 +55,8 @@ int main()
     
 
     std::string row, str_elc1, str_elc2, str_elc3, str_elc4, str_elc5, str_elc6, str_elc7, str_elc8, str_acc1, str_acc2, str_acc3, str_tst;
-    int i;
     std::vector<double> electrod1, electrod2, electrod3, electrod4, electrod5, electrod6, electrod7, electrod8;
-    double acc1, acc3, acc2;
     std::string date;
-    int timestamp;
 
     csignal sig1, sig2, sig3, sig4, sig5, sig6, sig7, sig8;
 
