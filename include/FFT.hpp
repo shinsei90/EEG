@@ -112,7 +112,11 @@ static void printf_signal(const csignal& s, std::ofstream& oflile)
 
 std::ostream& operator<<(std::ostream& out, csignal const& outsig)
 {
-	auto real_val([](cmplx c){ return c.real(); });
-	out << real_val;
+	out << '[';
+	for (const auto& item : outsig)
+	{
+		out << "\t[" << item.real() << ',' << item.imag() << "]," << std::endl;
+	}
+	out << "],";
 	return out;
 }
