@@ -9,7 +9,9 @@
 #include <cmath>
 #include <iterator>
 
-const double PI = 3.141592653589793238460;
+#ifdef _MSC_VER
+constexpr double M_PI = 3.141592653589793238460;
+#endif
 
 //* Implementation from “Jeganathan Swaminathan, Maya Posch, Jacek Galowicz -- Expert C++ Programming.”.
 
@@ -19,7 +21,13 @@ using csignal = std::vector<cmplx>;
 class num_iterator
 {
 	size_t i;
-	public:
+public:
+	using difference_type = ptrdiff_t;
+	using value_type = size_t;
+	using pointer = size_t*;
+	using reference = size_t&;
+	using iterator_category = std::input_iterator_tag;
+
 	explicit num_iterator(size_t position) : i(position){}
 	
 	size_t operator*() const {return i;}
@@ -104,7 +112,11 @@ static void printf_signal(const csignal& s, std::ofstream& oflile)
 
 std::ostream& operator<<(std::ostream& out, csignal const& outsig)
 {
-	auto real_val([](cmplx c){ return c.real(); });
-	out << real_val;
+	out << '[';
+	for (const auto& item : outsig)
+	{
+		out << "\t[" << item.real() << ',' << item.imag() << "]," << std::endl;
+	}
+	out << "],";
 	return out;
 }
